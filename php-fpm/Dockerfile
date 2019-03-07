@@ -546,6 +546,16 @@ COPY ./xlaravel.pool.conf /usr/local/etc/php-fpm.d/
 
 USER root
 
+RUN apt-get install -y git \
+    && cd /tmp \
+    && git clone https://github.com/edenhill/librdkafka.git \
+    && cd librdkafka \
+    && ./configure \
+    && make \
+    && make install
+
+RUN pecl install rdkafka && docker-php-ext-enable rdkafka
+
 # Clean up
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \

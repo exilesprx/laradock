@@ -61,7 +61,30 @@ ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c",  "/etc/supervisord.conf"]
 #
 # If you need to modify this image, feel free to do it right here.
 #
-    # -- Your awesome modifications go here -- #
+
+RUN apk add bash
+
+RUN apk add -y git \
+    && cd /tmp \
+    && git clone https://github.com/edenhill/librdkafka.git \
+    && cd librdkafka \
+    && ./configure \
+    && make \
+    && make install
+
+RUN pecl install rdkafka && docker-php-ext-enable rdkafka
+RUN apk add libressl-dev
+ARG INSTALL_MONGO=true
+
+RUN if [ ${INSTALL_MONGO} = true ]; then \
+    # Install the mongodb extension
+    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+      pecl install mongo && \
+      docker-php-ext-enable mongo \
+    ;fi && \
+    pecl install mongodb && \
+    docker-php-ext-enable mongodb \
+;fi
 
 #
 #--------------------------------------------------------------------------
